@@ -1,49 +1,63 @@
 import { useState } from "react";
 
 function App() {
-  const [height, setHeight] = useState('');
+  const [feet, setFeet] = useState('');
+  const [inches, setInches] = useState('');
   const [weight, setWeight] = useState('');
   const [age, setAge] = useState('');
   const [bmi, setBMI] = useState(null);
   const [healthCondition, setHealthCondition] = useState('');
 
   const calculateBMI = () => {
-    if (!height || !weight || !age) {
-      alert('Please enter height, weight, and age.');
+    if (!feet || !inches || !weight || !age) {
+      alert('Please enter height (feet and inches), weight, and age.');
       return;
     }
 
-    const heightMeters = height / 100;
-    const bmiValue = (weight / (heightMeters * heightMeters)).toFixed(2);
+    const heightInInches = feet * 12 + parseInt(inches);
+    const heightInMeters = heightInInches * 0.0254; // Convert to meters
+    const bmiValue = (weight / (heightInMeters * heightInMeters)).toFixed(2);
     setBMI(bmiValue);
 
-    const idealWeight = calculateIdealWeight(height, age);
-    if (weight > idealWeight) {
-      setHealthCondition('Overweight');
-    } else if (weight < idealWeight) {
+    const idealWeight = calculateIdealWeight(heightInInches, age);
+
+    if (bmiValue < 18.5 && weight < idealWeight) {
       setHealthCondition('Underweight');
+    } else if (bmiValue >= 18.5 && bmiValue <= 24.9) {
+      setHealthCondition('Good health');
+    } else if (bmiValue >= 25 && weight > idealWeight) {
+      setHealthCondition('Overweight');
     } else {
-      setHealthCondition('Normal weight');
+      setHealthCondition('Average health');
     }
   };
 
-  const calculateIdealWeight = (height, age) => {
+  const calculateIdealWeight = (heightInInches, age) => {
     // Simple formula for ideal weight based on height and age
     // You can adjust this formula as per your requirement
-    return (height - 100 + (age / 10)) * 0.9;
+    return (heightInInches - 60 + (age / 10) * 2.3);
   };
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <h1 className="text-2xl font-bold mb-4">BMI Calculator</h1>
       <div className="flex flex-col items-center">
-        <input
-          type="number"
-          className="w-48 border border-gray-300 rounded-md p-2 mb-2"
-          placeholder="Height (cm)"
-          value={height}
-          onChange={(e) => setHeight(e.target.value)}
-        />
+        <div className="flex">
+          <input
+            type="number"
+            className="w-20 border border-gray-300 rounded-md p-2 mb-2 mr-2"
+            placeholder="Feet"
+            value={feet}
+            onChange={(e) => setFeet(e.target.value)}
+          />
+          <input
+            type="number"
+            className="w-20 border border-gray-300 rounded-md p-2 mb-2"
+            placeholder="Inches"
+            value={inches}
+            onChange={(e) => setInches(e.target.value)}
+          />
+        </div>
         <input
           type="number"
           className="w-48 border border-gray-300 rounded-md p-2 mb-2"
@@ -72,9 +86,8 @@ function App() {
           <p className="text-gray-700">BMI Categories:</p>
           <ul className="list-disc pl-8">
             <li>Underweight: less than 18.5</li>
-            <li>Normal weight: 18.5–24.9</li>
-            <li>Overweight: 25–29.9</li>
-            <li>Obesity: 30 or more</li>
+            <li>Good health: 18.5–24.9</li>
+            <li>Overweight: 25 or more</li>
           </ul>
         </div>
       )}
